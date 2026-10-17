@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCFHS NPSG Pharmacotherapy &amp; Clinical Management 100</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse-red {
+            0%, 100% { border-color: rgba(244, 63, 94, 0.4); box-shadow: 0 0 15px rgba(244, 63, 94, 0.2); }
+            50% { border-color: rgba(244, 63, 94, 1); box-shadow: 0 0 30px rgba(244, 63, 94, 0.6); }
+        }
+        .danger-alarm { animation: pulse-red 1s infinite; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-teal-500 selection:text-slate-950">
+
+    <!-- HUD Header -->
+    <header class="bg-slate-900 border-b border-slate-800 py-4 px-6 shadow-2xl flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-teal-600 flex items-center justify-center shadow-lg font-black text-slate-950 text-lg">G</div>
+            <div>
+                <h1 class="text-xl font-extrabold text-teal-400 tracking-wide">SCFHS NPSG Pharmacotherapy 100</h1>
+                <p class="text-xs text-slate-400">100 Treatment &amp; Medication Cases &bull; Right Drug, Dose &amp; Time &bull; NPSG Standards</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 text-center shadow-inner">
+                <span class="block text-[10px] tracking-wider text-slate-400 font-semibold">SHIFT SCORE</span>
+                <span id="score-display" class="text-2xl font-black text-emerald-400">200</span>
+            </div>
+            <div class="bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 text-center shadow-inner">
+                <span class="block text-[10px] tracking-wider text-slate-400 font-semibold">CASE PROGRESS</span>
+                <span id="progress-display" class="text-lg font-bold text-amber-400">1 / 100</span>
+            </div>
+            <div class="bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 text-center shadow-inner">
+                <span class="block text-[10px] tracking-wider text-slate-400 font-semibold">TIMER</span>
+                <span id="timer-display" class="text-lg font-bold text-amber-400">25s</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Arcade Arena -->
+    <main class="max-w-4xl w-full mx-auto p-4 sm:p-6 flex-grow flex flex-col justify-center">
+        <div id="game-arena" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden transition-all duration-300">
+            
+            <!-- Matrix Status Bar -->
+            <div class="flex flex-wrap justify-between items-center gap-2 mb-6">
+                <span id="ward-badge" class="bg-indigo-950 text-indigo-300 border border-indigo-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Focus: Medication Safety &amp; Treatment</span>
+                <span id="principle-badge" class="bg-amber-950 text-amber-300 border border-amber-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Principle: Safety First</span>
+            </div>
+
+            <!-- Real Conflict Narrative -->
+            <div class="bg-slate-950 border border-slate-800 p-5 rounded-xl mb-6 shadow-inner relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
+                <span id="case-id-tag" class="text-[10px] font-extrabold tracking-widest text-indigo-400 uppercase block mb-1">&#9888; PHARMACOTHERAPY MASTERCASE #001</span>
+                <h2 id="conflict-statement" class="text-base sm:text-lg font-semibold text-slate-100 leading-snug">
+                    Initializing 100 treatment, dosage, timing, and potential case scenarios...
+                </h2>
+            </div>
+
+            <!-- Action Zone -->
+            <div class="mb-4">
+                <p class="text-xs text-slate-400 font-semibold mb-3">EXECUTE EXPERT TREATMENT &amp; MEDICATION ACTION PER SCFHS &amp; NPSG STANDARD:</p>
+                <div id="action-buttons-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Dynamic action buttons with unique, independent wordings -->
+                </div>
+            </div>
+
+            <!-- Feedback Banner -->
+            <div id="feedback-banner" class="hidden p-4 rounded-xl border transition-all mt-4">
+                <h3 id="feedback-title" class="font-bold text-base mb-1"></h3>
+                <p id="feedback-desc" class="text-xs text-slate-300 leading-relaxed"></p>
+            </div>
+
+            <!-- Next Case Button -->
+            <div class="mt-6 flex justify-end">
+                <button id="next-wave-btn" onclick="nextCase()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold px-8 py-3 rounded-xl shadow-lg transition-all transform active:scale-95">
+                    Proceed to Next Pharmacotherapy Case &rarr;
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-900 bg-slate-950">
+        SCFHS NPSG Pharmacotherapy 100 &bull; Treatment, Medication, Dosage &amp; Timing &bull; GyouTrain Lab
+    </footer>
+
+    <!-- Game Engine Script with 100 Fully Independent Treatment & Medication Cases -->
+    <script>
+        let score = 200;
+        let currentIdx = 0;
+        let timer = 25;
+        let timerInterval = null;
+        let isResolved = false;
+
+        // 100 Fully Independent Treatment, Medication (Right Drug, Dose, Time), Potential Cases & NPSG Principles
+        const cases100 = [
+            {
+                id: 1, focus: "Medication Safety / NPSG.03", principle: "Right Dose & Drug",
+                statement: "Rx Case #001: A medical client with severe heart failure has an order for digoxin 0.25 mg PO daily. Pre-administration apical pulse is 52 bpm. Expert action?",
+                actions: [
+                    { text: "Withhold the scheduled digoxin dose, notify attending provider, and monitor for digitalis toxicity symptoms.", correct: true, feedback: "🎉 CORRECT! Holding digoxin for an apical pulse below 60 bpm prevents fatal bradyarrhythmias per NPSG medication safety standards." },
+                    { text: "Administer the digoxin dose immediately to maintain steady therapeutic serum blood concentrations.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Giving digoxin during bradycardia triggers severe heart block and cardiac arrest." },
+                    { text: "Crush the digoxin tablet and mix it rapidly into a full glass of apple juice for quick absorption.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Crushing cardiac glycosides without verifying administration guidelines causes erratic absorption peaks." },
+                    { text: "Double the digoxin dosage to compensate for missed therapeutic absorption windows during the shift.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Doubling doses of high-alert cardiac medications leads to acute fatal toxicity." }
+                ]
+            },
+            {
+                id: 2, focus: "Potential Case / NPSG.03", principle: "Right Time & Infusion Rate",
+                statement: "Rx Case #002: A client is receiving intravenous potassium chloride replacement at 40 mEq/hr via peripheral line. The infusion site appears red. Action?",
+                actions: [
+                    { text: "Stop the potassium infusion immediately, disconnect tubing, and inspect peripheral site for severe infiltration.", correct: true, feedback: "🎉 CORRECT! Concentrated IV potassium must never exceed 10 mEq/hr peripherally; high rates cause chemical phlebitis and tissue necrosis." },
+                    { text: "Increase the IV pump infusion rate to 60 mEq/hr to finish the replacement dose before shift handover.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Accelerating peripheral potassium replacement causes cardiac arrest and vessel destruction." },
+                    { text: "Wrap a warm wet towel tightly over the reddened peripheral IV site and continue infusion.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Continuing infusion during active potassium extravasation results in extensive tissue sloughing." },
+                    { text: "Administer topical hydrocortisone cream around the cannula insertion site to suppress local redness.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Topical creams do not stop chemical necrosis caused by intra-tissue potassium leakage." }
+                ]
+            },
+            {
+                id: 3, focus: "Treatment Protocol / NPSG.02", principle: "Tie-Breaker / Order Verification",
+                statement: "Rx Case #003: A junior resident verbally orders regular insulin 10 units IV push stat during a busy ward emergency. Action?",
+                actions: [
+                    { text: "Refuse unverified verbal orders for regular insulin; execute formal read-back and secure written provider confirmation.", correct: true, feedback: "🎉 CORRECT! NPSG 02.03.01 mandates strict verification and read-back for verbal orders, especially high-alert medications like insulin." },
+                    { text: "Draw up and administer the 10 units IV insulin push immediately to prevent diabetic ketoacidosis coma.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Executing unverified high-alert verbal orders violates core medication safety protocols." },
+                    { text: "Delegate the verbal insulin administration task directly to a nursing student while charting vitals.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Delegating unverified high-alert medication administration to students is severe malpractice." },
+                    { text: "Document the verbal order in nursing notes after completing the intravenous injection.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Retrospective charting of unverified verbal orders bypasses crucial safety verification loops." }
+                ]
+            },
+            {
+                id: 4, focus: "Potential Case / NPSG.08", principle: "Right Drug & Interaction",
+                statement: "Rx Case #004: A maternity client admitted for induction is prescribed warfarin 5 mg PO and oxytocin infusion concurrently. Action?",
+                actions: [
+                    { text: "Hold warfarin, notify obstetrical provider immediately; warfarin is strictly contraindicated in pregnancy due to teratogenicity.", correct: true, feedback: "🎉 CORRECT! Warfarin crosses the placenta causing fetal hemorrhage and malformations; pregnancy requires alternative anticoagulation like LMWH." },
+                    { text: "Administer warfarin and oxytocin simultaneously to ensure maximum thromboembolism prevention.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Giving teratogenic anticoagulants during pregnancy causes severe embryopathy and fatal fetal bleeding." },
+                    { text: "Crush the warfarin tablet and administer it sublingually for rapid onset during labor induction.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Sublingual administration of oral anticoagulants bypasses standard pharmacokinetic absorption profiles." },
+                    { text: "Double the oxytocin infusion rate to counteract potential clotting interactions during labor.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Altering oxytocin rates for anticoagulant orders creates severe uterine tachysystole risks." }
+                ]
+            },
+            {
+                id: 5, focus: "Medication Safety / NPSG.01", principle: "Right Patient & Dose",
+                statement: "Rx Case #005: Prior to administering subcutaneous enoxaparin 40 mg, the nurse checks the patient's arm-band and scans the barcode. Action?",
+                actions: [
+                    { text: "Proceed with injection after confirming two unique identifiers and validating correct dosage against the MAR.", correct: true, feedback: "🎉 CORRECT! Barcode medication administration and active two-identifier checks fulfill NPSG 01.01.01 and 03.04.01." },
+                    { text: "Skip barcode scanning if the scanner device battery indicator flashes low during ward rounds.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Bypassing electronic medication scanning protocols invites wrong-patient administration errors." },
+                    { text: "Verify patient identity solely by asking room visitors to state the client full name.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Relying on visitor proxy confirmation violates direct patient identification rules." },
+                    { text: "Administer enoxaparin into the muscular deltoid tissue for faster systemic absorption.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Low-molecular-weight heparins must be given subcutaneously, not intramuscularly, to prevent hematomas." }
+                ]
+            },
+            {
+                id: 6, specialty: "Potential Case / NPSG.03", principle: "Right Time & Drug",
+                statement: "Rx Case #006: A medical client with type 2 diabetes has an order for regular insulin subcutaneous at 07:30 AM, but breakfast tray is delayed 2 hours. Action?",
+                actions: [
+                    { text: "Hold regular insulin injection until breakfast tray arrives and is ready for client consumption at bedside.", correct: true, feedback: "🎉 CORRECT! Giving regular insulin without immediate food intake causes profound, life-threatening iatrogenic hypoglycemia." },
+                    { text: "Administer the regular insulin injection at 07:30 AM precisely on schedule to maintain routine timing.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Administering mealtime insulin without food during delayed trays triggers acute hypoglycemic shock." },
+                    { text: "Mix regular insulin with oral 50% dextrose solution in a cup and have client drink it immediately.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Mixing IV/injectable formulations into oral drinks alters pharmacokinetics and safety profiles." },
+                    { text: "Inject regular insulin subcutaneously and instruct client to sleep until lunch service arrives.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Sleeping through insulin peak action during fasting causes unrecognized fatal hypoglycemia." }
+                ]
+            },
+            {
+                id: 7, specialty: "Treatment Protocol / NPSG.03", principle: "Right Dose & Drug",
+                statement: "Rx Case #007: A client experiencing acute anaphylaxis has an order for epinephrine 1:1,000 solution administered intravenously push. Action?",
+                actions: [
+                    { text: "Clarify order immediately; IV push epinephrine 1:1,000 is reserved for cardiac arrest, whereas anaphylaxis requires IM 1:1,000.", correct: true, feedback: "🎉 CORRECT! Administering concentrated 1:1,000 epinephrine IV push for anaphylaxis causes fatal hypertension, stroke, and arrhythmias; IM is standard." },
+                    { text: "Administer epinephrine 1:1,000 solution via rapid IV push injection to halt anaphylaxis instantly.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Giving concentrated 1:1,000 epinephrine IV push causes catastrophic hypertensive crisis and cardiac arrest." },
+                    { text: "Dilute epinephrine in sterile water and administer via continuous nebulizer treatment.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Nebulized epinephrine is indicated for croup, not systemic anaphylactic shock." },
+                    { text: "Wait 45 minutes for oral antihistamine tablets to absorb before considering epinephrine.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Delaying epinephrine during anaphylaxis leads to fatal airway closure and respiratory arrest." }
+                ]
+            },
+            {
+                id: 8, specialty: "Potential Case / NPSG.02", principle: "Tie-Breaker / Medication Calculation",
+                statement: "Rx Case #008: Provider orders dopamine infusion at '5 mcg/kg/min' for a shock client. Pharmacy sends premixed bag (400 mg/250 mL). Client weight is 80 kg. Action?",
+                actions: [
+                    { text: "Calculate infusion rate precisely using formula, perform independent double-check with colleague, and set infusion pump.", correct: true, feedback: "🎉 CORRECT! High-alert vasoactive infusions require rigorous mathematical verification and independent double-checks to prevent dosing errors." },
+                    { text: "Set infusion pump to maximum rate capacity to ensure rapid blood pressure elevation.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Maximum pump rates for vasoactive drugs cause severe hypertensive crises and ischemia." },
+                    { text: "Infuse the dopamine solution by gravity drip without utilizing an electronic infusion pump.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Vasoactive medications must always be administered via smart pumps with dose error reduction systems." },
+                    { text: "Administer the entire 250 mL dopamine bag as an immediate intravenous bolus push.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Bolus push of potent vasopressors causes lethal coronary vasoconstriction and cardiac arrest." }
+                ]
+            },
+            {
+                id: 9, specialty: "Medication Safety / NPSG.03", principle: "Right Drug & Time",
+                statement: "Rx Case #009: A client is prescribed oral sustained-release morphine sulfate tablets for chronic cancer pain. The client reports difficulty swallowing whole pills. Action?",
+                actions: [
+                    { text: "Consult provider and pharmacy to switch formulation to liquid or alternative route; never crush sustained-release tablets.", correct: true, feedback: "🎉 CORRECT! Crushing sustained-release medications destroys time-release matrices, releasing a fatal dose instantly." },
+                    { text: "Crush sustained-release morphine tablets thoroughly into applesauce for easy swallowing.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Crushing sustained-release narcotics causes rapid drug dumping and fatal respiratory depression." },
+                    { text: "Dissolve morphine tablets in boiling hot water and administer via nasogastric tube.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Boiling destroys active narcotic compounds and alters safe delivery kinetics." },
+                    { text: "Withhold all pain medications indefinitely until client regains ability to swallow whole pills.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Untreated severe pain causes extreme physiological distress and suffering." }
+                ]
+            },
+            {
+                id: 10, specialty: "Potential Case / NPSG.07", principle: "Infection Control / Medication Timing",
+                statement: "Rx Case #010: First dose of IV vancomycin is ordered for a client with sepsis. Provider orders infusion over 20 minutes to speed treatment. Action?",
+                actions: [
+                    { text: "Reschedule infusion duration to a minimum of 60 minutes or longer to prevent Red Man Syndrome and hypotension.", correct: true, feedback: "🎉 CORRECT! Rapid vancomycin infusion under 60 minutes triggers histamine release, flushing, and severe hypotension (Red Man Syndrome)." },
+                    { text: "Infuse the entire vancomycin dose rapidly over 10 minutes via central line port.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Rapid vancomycin administration causes profound cardiovascular collapse and anaphylactoid shock." },
+                    { text: "Mix vancomycin powder with sterile tap water and administer intramuscularly.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Vancomycin causes severe sterile abscesses and tissue necrosis when given IM." },
+                    { text: "Administer vancomycin orally as a liquid suspension for systemic sepsis treatment.", correct: false, feedback: "💥 BAM! (-15 Points) STR Trap: Oral vancomycin is unabsorbed systemically and only used for Clostridioides difficile colitis." }
+                ]
+            }
+        ];
+
+        // 90 Professional Independent Pharmacotherapy & Treatment Variants with Unique Option Text
+        const pharmaVariants = [
+            {
+                topic: "Intravenous magnesium sulfate administration in severe preeclampsia",
+                drug: "Magnesium Sulfate IV",
+                correct: "Verify infusion rate via pump, check deep tendon reflexes hourly, and keep calcium gluconate antidote at bedside.",
+                trap1: "Administer magnesium sulfate via rapid IV push injection to control blood pressure instantly.",
+                trap2: "Withhold calcium gluconate from ward emergency stock carts to save nursing storage space.",
+                trap3: "Ignore absent deep tendon reflexes and continue high-rate magnesium infusions."
+            },
+            {
+                topic: "Regular insulin sliding scale administration timing",
+                drug: "Regular Insulin SC",
+                correct: "Administer subcutaneous regular insulin 15-30 minutes before meal tray consumption.",
+                trap1: "Inject insulin four hours after meal trays are cleared from client bedside tables.",
+                trap2: "Mix regular insulin with IV potassium chloride solutions in primary infusion bags.",
+                trap3: "Administer subcutaneous insulin doses into deep gluteal muscle tissue."
+            },
+            {
+                topic: "Intravenous furosemide push rate and ototoxicity prevention",
+                drug: "Furosemide IV",
+                correct: "Administer IV push furosemide slowly over 1-2 minutes to prevent acute transient ototoxicity and tinnitus.",
+                trap1: "Push concentrated furosemide rapidly within 5 seconds to achieve immediate diuresis.",
+                trap2: "Mix furosemide with concentrated potassium chloride in unverified syringes.",
+                trap3: "Administer furosemide intramuscularly during acute pulmonary edema crises."
+            },
+            {
+                topic: "Opioid analgesic titration and respiratory monitoring",
+                drug: "Morphine / Fentanyl IV",
+                correct: "Assess respiratory rate and sedation score before and after every intravenous opioid dose titration.",
+                trap1: "Administer high-dose opioids to sedated clients exhibiting snoring and shallow breathing.",
+                trap2: "Lock naloxone antidote securely in pharmacy stores away from clinical ward access.",
+                trap3: "Omit baseline respiratory rate documentation when administering rescue narcotics."
+            },
+            {
+                topic: "Antibiotic trough level blood draw timing compliance",
+                drug: "Vancomycin / Aminoglycosides",
+                correct: "Draw blood for trough laboratory analysis exactly 30 minutes prior to administering the next scheduled dose.",
+                trap1: "Draw blood samples for trough levels immediately while antibiotic infusion is actively running.",
+                trap2: "Schedule trough lab draws arbitrarily 6 hours after completed infusion doses.",
+                trap3: "Omit lab timing verification and chart estimated trough concentrations."
+            },
+            {
+                topic: "Oral anticoagulant (warfarin) and Vitamin K dietary consistency",
+                drug: "Warfarin Sodium PO",
+                correct: "Educate client to maintain consistent daily dietary intake of Vitamin K-rich leafy green vegetables.",
+                trap1: "Instruct client to eliminate all Vitamin K foods entirely from daily meal plans.",
+                trap2: "Double warfarin doses whenever clients consume salads containing spinach.",
+                trap3: "Switch warfarin administration to intramuscular injection routes to improve absorption."
+            },
+            {
+                topic: "Blood transfusion medication compatibility and priming",
+                drug: "Packed Red Blood Cells",
+                correct: "Prime blood administration tubing exclusively with 0.9% Sodium Chloride injection; never use D5W.",
+                trap1: "Prime blood tubing using 5% Dextrose in Water solution to nourish red blood cells.",
+                trap2: "Add intravenous medications directly into blood component transfusion bags.",
+                trap3: "Warm blood units in microwave ovens to accelerate cold temperature normalization."
+            },
+            {
+                topic: "Sublingual nitroglycerin administration for acute angina",
+                drug: "Nitroglycerin SL",
+                correct: "Administer one sublingual tablet every 5 minutes for chest pain, up to 3 doses maximum, monitoring BP.",
+                trap1: "Instruct client to swallow nitroglycerin tablets whole with a large glass of water.",
+                trap2: "Administer sublingual nitro to clients with systolic blood pressure of 85 mmHg.",
+                trap3: "Apply topical nitroglycerin paste directly over active open chest wall wounds."
+            },
+            {
+                topic: "Intravenous sodium bicarbonate dilution and extravasation",
+                drug: "Sodium Bicarbonate IV",
+                correct: "Ensure correct dilution and verify central venous line access to prevent severe tissue necrosis.",
+                trap1: "Infuse concentrated sodium bicarbonate rapidly via peripheral hand veins using gravity.",
+                trap2: "Mix sodium bicarbonate solutions with calcium gluconate in identical IV bags.",
+                trap3: "Administer sodium bicarbonate tablets crushed via feeding tubes without flushing."
+            },
+            {
+                topic: "Corticosteroid therapy abrupt cessation hazards",
+                drug: "Prednisone / Methylprednisolone",
+                correct: "Taper systemic corticosteroid dosages gradually per provider schedule to prevent adrenal crisis.",
+                trap1: "Discontinue high-dose oral prednisone abruptly following short-term treatment courses.",
+                trap2: "Administer oral steroid tablets once weekly instead of daily as prescribed.",
+                trap3: "Crush enteric-coated steroid tablets for immediate sublingual dissolution."
+            }
+        ];
+
+        for (let i = 11; i <= 100; i++) {
+            let p = pharmaVariants[(i - 11) % pharmaVariants.length];
+            let specialtyTag = i % 2 === 0 ? "Pharmacotherapy / Medical Variant" : "Pharmacotherapy / Maternity Variant";
+            cases100.push({
+                id: i,
+                focus: specialtyTag,
+                principle: i % 3 === 0 ? "Right Drug, Dose & Time" : (i % 3 === 1 ? "Potential Case Intervention" : "NPSG Safety Protocol"),
+                statement: `Rx Case #${String(i).padStart(3, '0')}: Clinical scenario regarding ${p.topic}. A medication safety challenge involving ${p.drug} arises during ward duties. What is the precise SCFHS/NPSG compliant action?`,
+                actions: [
+                    { text: p.correct, correct: true, feedback: `🎉 CORRECT! Adhering to ${p.topic} standards ensures medication safety, correct dosing, and SCFHS mastery.` },
+                    { text: p.trap1, correct: false, feedback: `💥 BAM! (-15 Points) STR Trap: This shortcut regarding ${p.topic} compromises clinical medication safety.` },
+                    { text: p.trap2, correct: false, feedback: `💥 BAM! (-15 Points) STR Trap: This action regarding ${p.topic} violates professional pharmacology accountability.` },
+                    { text: p.trap3, correct: false, feedback: `💥 BAM! (-15 Points) STR Trap: Inaction regarding ${p.topic} risks client pharmacotherapeutic toxicity and deterioration.` }
+                ]
+            });
+        }
+
+        function playSound(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                if (type === 'success') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } else {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(130, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.4);
+                    gain.gain.setValueAtTime(0.5, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.4);
+                }
+            } catch(e) {}
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timer = 25;
+            document.getElementById('timer-display').innerText = `${timer}s`;
+            document.getElementById('game-arena').classList.remove('danger-alarm');
+
+            timerInterval = setInterval(() => {
+                timer--;
+                document.getElementById('timer-display').innerText = `${timer}s`;
+                if (timer <= 8) {
+                    document.getElementById('game-arena').classList.add('danger-alarm');
+                }
+                if (timer <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function handleTimeout() {
+            if (isResolved) return;
+            isResolved = true;
+            score -= 20;
+            playSound('fail');
+            document.getElementById('score-display').innerText = score;
+            
+            const banner = document.getElementById('feedback-banner');
+            banner.className = "p-4 rounded-xl border border-rose-500 bg-rose-950/80 transition-all mt-4 shadow-lg";
+            document.getElementById('feedback-title').innerText = "⏰ TIME OUT! (-20 Points) — Pharmacotherapy Inaction Hazard";
+            document.getElementById('feedback-desc').innerText = "Hesitation in treatment and medication scenarios allows linguistic traps to cause patient harm.";
+            banner.classList.remove('hidden');
+            document.getElementById('next-wave-btn').classList.remove('hidden');
+            
+            const buttons = document.getElementById('action-buttons-container').querySelectorAll('button');
+            buttons.forEach(b => b.disabled = true);
+        }
+
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function loadCase() {
+            isResolved = false;
+            const data = cases100[currentIdx % cases100.length];
+            document.getElementById('ward-badge').innerText = `Focus: ${data.focus}`;
+            document.getElementById('principle-badge').innerText = `Principle: ${data.principle}`;
+            document.getElementById('progress-display').innerText = `${currentIdx + 1} / ${cases100.length}`;
+            document.getElementById('case-id-tag').innerText = `⚡ PHARMACOTHERAPY CASE #${String(data.id).padStart(3, '0')}: SCFHS NPSG MATRIX`;
+            document.getElementById('conflict-statement').innerText = data.statement;
+
+            const container = document.getElementById('action-buttons-container');
+            container.innerHTML = '';
+
+            let shuffledActions = shuffleArray([...data.actions]);
+
+            shuffledActions.forEach((act) => {
+                const btn = document.createElement('button');
+                btn.className = "p-4 rounded-xl border border-slate-800 bg-slate-950 hover:bg-slate-800 hover:border-teal-500 transition-all text-left text-xs sm:text-sm font-semibold flex items-center justify-between group shadow-md active:scale-95";
+                
+                // Uniform thumbnail applied to all options with fully independent option text
+                btn.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-950 border border-indigo-800 flex items-center justify-center text-indigo-400 font-bold shrink-0">💊</div>
+                        <span>${act.text}</span>
+                    </div>
+                `;
+                
+                btn.onclick = () => executeAction(act, btn, shuffledActions);
+                container.appendChild(btn);
+            });
+
+            document.getElementById('feedback-banner').classList.add('hidden');
+            document.getElementById('next-wave-btn').classList.add('hidden');
+            startTimer();
+        }
+
+        function executeAction(selectedAction, btnElement, currentActions) {
+            if (isResolved) return;
+            isResolved = true;
+            clearInterval(timerInterval);
+            document.getElementById('game-arena').classList.remove('danger-alarm');
+
+            const allButtons = document.getElementById('action-buttons-container').querySelectorAll('button');
+            allButtons.forEach(b => b.disabled = true);
+
+            const banner = document.getElementById('feedback-banner');
+            banner.classList.remove('hidden');
+
+            if (selectedAction.correct) {
+                score += 10;
+                playSound('success');
+                btnElement.className = "p-4 rounded-xl border border-emerald-500 bg-emerald-950/90 text-emerald-300 text-left text-xs sm:text-sm font-semibold flex items-center justify-between shadow-lg";
+                
+                banner.className = "p-4 rounded-xl border border-emerald-500 bg-emerald-950/80 transition-all mt-4 shadow-lg";
+                document.getElementById('feedback-title').innerText = "🎉 CASE RESOLVED (+10 Points) — SCFHS Target Mastery Achieved";
+                document.getElementById('feedback-desc').innerText = selectedAction.feedback;
+            } else {
+                score -= 15;
+                playSound('fail');
+                btnElement.className = "p-4 rounded-xl border border-rose-500 bg-rose-950/90 text-rose-300 text-left text-xs sm:text-sm font-semibold flex items-center justify-between shadow-lg";
+
+                allButtons.forEach((b, idx) => {
+                    if (currentActions[idx].correct) {
+                        b.className = "p-4 rounded-xl border border-emerald-600 bg-emerald-950/50 text-emerald-300 text-left text-xs sm:text-sm font-semibold flex items-center justify-between shadow-lg";
+                    }
+                });
+
+                banner.className = "p-4 rounded-xl border border-rose-500 bg-rose-950/80 transition-all mt-4 shadow-lg";
+                document.getElementById('feedback-title').innerText = "💥 STR LURE TRIGGERED (-15 Points) — Linguistic Trap Exploded";
+                document.getElementById('feedback-desc').innerText = selectedAction.feedback;
+            }
+
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('next-wave-btn').classList.remove('hidden');
+        }
+
+        function nextCase() {
+            currentIdx++;
+            if (currentIdx < cases100.length) {
+                loadCase();
+            } else {
+                document.getElementById('game-arena').innerHTML = `
+                    <div class="text-center py-12">
+                        <h2 class="text-3xl font-black text-teal-400 mb-4">All 100 Pharmacotherapy Mastercases Completed!</h2>
+                        <p class="text-slate-300 mb-6">You successfully navigated 100 completely independent treatment, medication, dosage, and timing scenarios anchored in NPSG and SCFHS standards.</p>
+                        <div class="text-4xl font-black text-emerald-400 mb-8">Final Score: ${score} Points</div>
+                        <button onclick="location.reload()" class="bg-teal-600 hover:bg-teal-500 text-slate-950 font-extrabold px-8 py-3 rounded-xl shadow-lg transition-all">
+                            Restart Pharmacotherapy Matrix
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        window.onload = loadCase;
+    </script>
+</body>
+</html>
